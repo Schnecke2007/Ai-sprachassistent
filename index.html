@@ -1,0 +1,241 @@
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Sprachassistent</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Import WebsimSocket for real-time synchronization -->
+  <script src="https://cdn.jsdelivr.net/gh/websim-framework/websim-multi@main/client/build/index.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.2.0",
+      "react-dom/client": "https://esm.sh/react-dom@18.2.0/client"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="watercolor-bg"></div>
+    <div class="top-controls">
+      <div class="credits-container">
+        <i class="fas fa-coins credits-icon"></i>
+        <span class="credits-amount">150</span>
+        <span class="credits-timer"></span>
+      </div>
+      <button class="icon-button">
+        <i class="fas fa-volume-up"></i>
+      </button>
+      <button class="icon-button">
+        <i class="fas fa-info-circle"></i>
+      </button>
+      <button class="icon-button store-button">
+        <i class="fas fa-shopping-bag"></i>
+      </button>
+      <button class="icon-button">
+        <i class="fas fa-cog"></i>
+      </button>
+    </div>
+    <div class="controls">
+      <button id="startButton" class="start-button">
+        <i class="fas fa-microphone mic-icon"></i>
+      </button>
+    </div>
+  </div>
+  <div class="info-overlay">
+    <div class="info-popup">
+      <button class="close-info">
+        <i class="fas fa-times"></i>
+      </button>
+      <h2>AI Informationen</h2>
+      <div class="info-content">
+        <h3>Aktuelle Einstellungen:</h3>
+        <div id="aiSettings"></div>
+        
+        <h3>Sprachmodell:</h3>
+        <p>GPT-4 Vision</p>
+        <p>Modelltyp: Multimodales Large Language Model</p>
+        <p>Fähigkeiten:</p>
+        <ul>
+          <li>Natürliche Konversation</li>
+          <li>Kontextverständnis</li>
+          <li>Multilinguale Unterstützung</li>
+          <li>Personalisierte Interaktionen</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="settings-overlay">
+    <div class="settings-popup">
+      <button class="close-settings">
+        <i class="fas fa-times"></i>
+      </button>
+      <h2>Einstellungen</h2>
+      <form class="settings-form">
+        <div class="form-group">
+          <label for="aiName">Name der KI</label>
+          <input type="text" id="aiName" placeholder="z.B. Luna">
+        </div>
+        <div class="form-group">
+          <label for="userName">Wie soll die KI dich nennen?</label>
+          <input type="text" id="userName" placeholder="Dein Name">
+        </div>
+        <div class="form-group">
+          <label for="occupation">Beruf/Hobbys</label>
+          <input type="text" id="occupation" placeholder="z.B. Software-Entwickler, Fotografie">
+        </div>
+        <div class="form-group">
+          <label for="aiTraits">Gewünschte Eigenschaften der KI</label>
+          <textarea id="aiTraits" placeholder="z.B. freundlich, humorvoll, professionell"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="additionalInfo">Weitere Informationen über dich</label>
+          <textarea id="additionalInfo" placeholder="Weitere relevante Informationen..."></textarea>
+        </div>
+        <div class="settings-buttons">
+          <button type="button" class="settings-button save-button">Speichern</button>
+          <button type="button" class="settings-button reset-button">Zurücksetzen</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="confirmation-dialog">
+    <p>Nicht gespeicherte Änderungen gehen verloren. Fortfahren?</p>
+    <div class="confirmation-buttons">
+      <button class="confirmation-button confirm-yes">Ja</button>
+      <button class="confirmation-button confirm-no">Nein</button>
+    </div>
+  </div>
+
+  <div class="store-overlay">
+    <div class="store-popup">
+      <button class="close-store">
+        <i class="fas fa-times"></i>
+      </button>
+      <h2>Sprachassistenten Store</h2>
+      
+      <div class="store-tabs">
+        <button class="store-tab active" data-tab="discover">Entdecken</button>
+        <button class="store-tab" data-tab="create">Erstellen</button>
+      </div>
+      
+      <div class="tab-content active" id="discover-tab">
+        <div class="assistant-grid" id="assistants-container">
+          <!-- Assistants will be added dynamically -->
+        </div>
+      </div>
+      
+      <div class="tab-content" id="create-tab">
+        <form class="create-form">
+          <div class="form-group">
+            <label for="assistantName">Name des Assistenten</label>
+            <input type="text" id="assistantName" placeholder="z.B. Luna">
+          </div>
+          
+          <div class="form-group">
+            <label for="assistantTraits">Persönlichkeit</label>
+            <textarea id="assistantTraits" placeholder="z.B. freundlich, humorvoll, professionell"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label for="assistantInfo">Zusätzliche Informationen</label>
+            <textarea id="assistantInfo" placeholder="Weitere relevante Informationen..."></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Credits pro Nutzer</label>
+            <div class="credit-slider-container">
+              <input type="range" min="50" max="500" value="150" class="credit-slider" id="creditSlider">
+              <div class="credit-value" id="creditValue">150</div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Funktionen</label>
+            <div class="function-toggles">
+              <div class="function-toggle">
+                <span>Internetsuche</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="internetToggle" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="function-toggle">
+                <span>Datei-Erstellung</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="fileToggle" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="function-toggle">
+                <span>Kamera-Zugriff</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="cameraToggle" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <button type="button" id="publishButton" class="publish-button">Veröffentlichen</button>
+          
+          <div class="success-message" id="successMessage">
+            <p>Dein Sprachassistent wurde erfolgreich veröffentlicht!</p>
+            <div class="assistant-url" id="assistantUrl"></div>
+            <button class="copy-button" id="copyButton">URL kopieren</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-overlay">
+    <div class="detail-popup">
+      <button class="close-detail">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="assistant-detail-header">
+        <div class="detail-avatar">
+          <i class="fas fa-robot"></i>
+        </div>
+        <div class="detail-info">
+          <div class="detail-name" id="detailName">Name des Assistenten</div>
+          <div class="detail-creator" id="detailCreator">Erstellt von: User123</div>
+          <div class="detail-credits">
+            <i class="fas fa-coins"></i>
+            <span id="detailCredits">150</span> Credits
+          </div>
+        </div>
+      </div>
+      
+      <div class="detail-section">
+        <h4>Persönlichkeit</h4>
+        <div class="detail-personality" id="detailPersonality">
+          Freundlich, humorvoll und hilfsbereit
+        </div>
+      </div>
+      
+      <div class="detail-section">
+        <h4>Funktionen</h4>
+        <div class="detail-functions" id="detailFunctions">
+          <div class="function-tag">Internetsuche</div>
+          <div class="function-tag">Datei-Erstellung</div>
+          <div class="function-tag">Kamera-Zugriff</div>
+        </div>
+      </div>
+      
+      <button class="use-button" id="useButton">Diesen Assistenten verwenden</button>
+      <div class="assistant-url" id="assistantUrl"></div>
+      <button class="copy-button" id="copyButton">URL kopieren</button>
+    </div>
+  </div>
+
+  <div id="camera-preview-container">
+    <video id="camera-preview" autoplay muted playsinline></video>
+  </div>
+
+  <script src="script.js" type="module"></script>
+</body>
+</html>
